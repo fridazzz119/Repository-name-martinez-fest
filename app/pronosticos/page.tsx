@@ -32,18 +32,25 @@ export default function PronosticosPage() {
   );
 
   return (
-    <main className="min-h-screen bg-slate-950 text-white p-4 pb-28">
+    <main className="min-h-screen bg-white text-slate-900 p-4 pb-32">
       <div className="max-w-md mx-auto">
-        <h1 className="text-3xl font-bold mb-2">👀 Pronósticos</h1>
+        <div className="mb-6 pt-2">
+          <h1 className="text-3xl font-extrabold text-blue-700">
+            👀 Pronósticos
+          </h1>
 
-        <p className="text-slate-400 mb-6">
-          Pronósticos organizados por partido
-        </p>
+          <p className="text-slate-500 font-semibold">
+            Pronósticos organizados por partido
+          </p>
+        </div>
 
-        <div className="space-y-6">
+        <div className="space-y-5">
           {Object.entries(pronosticosPorPartido).map(([partido, lista]) => (
-            <div key={partido} className="bg-slate-900 rounded-3xl p-4">
-              <h2 className="text-lg font-bold text-green-400 mb-4">
+            <div
+              key={partido}
+              className="bg-white border border-slate-200 rounded-3xl p-4 shadow-sm"
+            >
+              <h2 className="text-lg font-extrabold text-blue-700 mb-4">
                 {partido}
               </h2>
 
@@ -51,11 +58,13 @@ export default function PronosticosPage() {
                 {lista.map((p, index) => (
                   <div
                     key={index}
-                    className="bg-slate-800 rounded-2xl p-3 flex items-center justify-between"
+                    className="bg-blue-50 border border-blue-100 rounded-2xl p-3 flex items-center justify-between"
                   >
-                    <span className="font-semibold">{p.nombre}</span>
+                    <span className="font-bold text-slate-800">
+                      {p.nombre}
+                    </span>
 
-                    <span className="text-xl font-bold">
+                    <span className="text-xl font-extrabold text-blue-700">
                       {p.goles_local} - {p.goles_visitante}
                     </span>
                   </div>
@@ -64,10 +73,17 @@ export default function PronosticosPage() {
             </div>
           ))}
         </div>
+
+        {pronosticos.length === 0 && (
+          <div className="bg-blue-50 border border-blue-100 rounded-3xl p-6 text-center text-slate-500 font-semibold">
+            Aún no hay pronósticos guardados.
+          </div>
+        )}
       </div>
 
       <BottomNav />
     </main>
   );
 }
+
 

@@ -1,7 +1,7 @@
 export default function BottomNav() {
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-slate-900 border-t border-slate-800">
-      <div className="max-w-md mx-auto grid grid-cols-5 py-3 text-xs text-center">
+    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 shadow-lg">
+      <div className="max-w-md mx-auto grid grid-cols-5 py-3 text-xs text-center text-slate-600">
         <a href="/">🏠<br />Inicio</a>
         <a href="/quiniela">⚽<br />Quiniela</a>
         <a href="/pronosticos">👀<br />Pronósticos</a>
@@ -11,4 +11,5 @@ export default function BottomNav() {
     </div>
   );
 }
+
 

@@ -19,27 +19,38 @@ export default function ResultadosPage() {
   }, []);
 
   return (
-    <main className="min-h-screen bg-slate-950 text-white p-4 pb-28">
+    <main className="min-h-screen bg-white text-slate-900 p-4 pb-32">
       <div className="max-w-md mx-auto">
-        <h1 className="text-3xl font-bold mb-2">📊 Resultados</h1>
+        <div className="mb-6 pt-2">
+          <h1 className="text-3xl font-extrabold text-blue-700">
+            📊 Resultados
+          </h1>
 
-        <p className="text-slate-400 mb-6">
-          Resultados oficiales capturados
-        </p>
+          <p className="text-slate-500 font-semibold">
+            Resultados oficiales capturados
+          </p>
+        </div>
 
-        <div className="space-y-3">
+        <div className="space-y-4">
           {resultados.length === 0 ? (
-            <div className="bg-slate-900 rounded-2xl p-6 text-center">
+            <div className="bg-blue-50 border border-blue-100 rounded-3xl p-6 text-center text-slate-500 font-semibold">
               Aún no hay resultados capturados.
             </div>
           ) : (
             resultados.map((r) => (
-              <div key={r.partido} className="bg-slate-900 rounded-2xl p-4">
-                <p className="font-semibold mb-2">{r.partido}</p>
-
-                <p className="text-3xl font-bold text-green-400">
-                  {r.goles_local} - {r.goles_visitante}
+              <div
+                key={r.partido}
+                className="bg-white border border-slate-200 rounded-3xl p-4 shadow-sm"
+              >
+                <p className="font-bold text-slate-800 mb-3">
+                  {r.partido}
                 </p>
+
+                <div className="flex justify-center">
+                  <div className="bg-blue-600 text-white px-6 py-3 rounded-2xl text-3xl font-extrabold">
+                    {r.goles_local} - {r.goles_visitante}
+                  </div>
+                </div>
               </div>
             ))
           )}
