@@ -12,17 +12,17 @@ export default function Home() {
           </p>
 
           <div className="space-y-3">
-            <button className="w-full bg-blue-600 py-3 rounded-xl font-semibold">
+            <a href="/login" className="block w-full bg-blue-600 py-3 rounded-xl font-semibold text-center">
               Iniciar Sesión
-            </button>
+            </a>
 
-            <button className="w-full bg-green-600 py-3 rounded-xl font-semibold">
+            <a href="/registro" className="block w-full bg-green-600 py-3 rounded-xl font-semibold text-center">
               Registrarse
-            </button>
+            </a>
 
-            <button className="w-full bg-slate-700 py-3 rounded-xl font-semibold">
+            <a href="/ranking" className="block w-full bg-slate-700 py-3 rounded-xl font-semibold text-center">
               Ver Ranking
-            </button>
+            </a>
           </div>
         </div>
       </div>
