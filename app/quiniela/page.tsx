@@ -1,6 +1,9 @@
+"use client";
+
+import { useState } from "react";
 import BottomNav from "../components/BottomNav";
 
- const grupos = [
+const grupos = [
   {
     fecha: "24 de junio",
     partidos: [
@@ -48,16 +51,86 @@ import BottomNav from "../components/BottomNav";
 ];
 
 export default function QuinielaPage() {
-  return (
-    <main className="min-h-screen bg-slate-950 text-white p-4 pb-24">
-      <div className="max-w-md mx-auto">
-        <h1 className="text-3xl font-bold">
-          MARTÍNEZ FEST
-        </h1>
+  const [nombre, setNombre] = useState("");
+  const [pronosticos, setPronosticos] = useState<
+    Record<string, { local: string; visitante: string }>
+  >({});
+  const [mensaje, setMensaje] = useState("");
+  const [cargando, setCargando] = useState(false);
 
-        <p className="text-slate-400 mb-6">
-          Quiniela Mundial 2026
-        </p>
+  function cambiarMarcador(
+    partido: string,
+    tipo: "local" | "visitante",
+    valor: string
+  ) {
+    setPronosticos((actuales) => ({
+      ...actuales,
+      [partido]: {
+        local: actuales[partido]?.local || "",
+        visitante: actuales[partido]?.visitante || "",
+        [tipo]: valor,
+      },
+    }));
+  }
+
+  async function guardarPronosticos() {
+    if (!nombre.trim()) {
+      setMensaje("⚠️ Escribe tu nombre antes de guardar");
+      return;
+    }
+
+    setCargando(true);
+    setMensaje("");
+
+    const respuesta = await fetch("/api/guardar", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        nombre,
+        pronosticos,
+      }),
+    });
+
+    const data = await respuesta.json();
+
+    if (!respuesta.ok) {
+      setMensaje(data.error || "Error al guardar");
+      setCargando(false);
+      return;
+    }
+
+    setMensaje("✅ Pronósticos guardados correctamente");
+    setCargando(false);
+  }
+
+  return (
+    <main className="min-h-screen bg-slate-950 text-white p-4 pb-28">
+      <div className="max-w-md mx-auto">
+        <h1 className="text-3xl font-bold">MARTÍNEZ FEST</h1>
+
+        <p className="text-slate-400 mb-6">Quiniela Mundial 2026</p>
+
+        <div className="bg-slate-900 rounded-2xl p-4 mb-6">
+          <label className="block text-sm text-slate-400 mb-2">
+            Tu nombre
+          </label>
+
+          <input
+            type="text"
+            value={nombre}
+            onChange={(e) => setNombre(e.target.value)}
+            placeholder="Ej. Frida"
+            className="w-full p-3 rounded-xl bg-slate-800 text-white"
+          />
+        </div>
+
+        {mensaje && (
+          <div className="mb-4 bg-slate-800 text-white p-3 rounded-xl text-center font-semibold">
+            {mensaje}
+          </div>
+        )}
 
         {grupos.map((grupo) => (
           <div key={grupo.fecha} className="mb-8">
@@ -67,18 +140,17 @@ export default function QuinielaPage() {
 
             <div className="space-y-3">
               {grupo.partidos.map((partido) => (
-                <div
-                  key={partido}
-                  className="bg-slate-900 rounded-2xl p-4"
-                >
-                  <p className="font-medium mb-3">
-                    {partido}
-                  </p>
+                <div key={partido} className="bg-slate-900 rounded-2xl p-4">
+                  <p className="font-medium mb-3">{partido}</p>
 
                   <div className="flex items-center gap-3">
                     <input
                       type="number"
                       min="0"
+                      value={pronosticos[partido]?.local || ""}
+                      onChange={(e) =>
+                        cambiarMarcador(partido, "local", e.target.value)
+                      }
                       className="w-16 p-2 rounded bg-slate-800 text-center"
                     />
 
@@ -87,6 +159,10 @@ export default function QuinielaPage() {
                     <input
                       type="number"
                       min="0"
+                      value={pronosticos[partido]?.visitante || ""}
+                      onChange={(e) =>
+                        cambiarMarcador(partido, "visitante", e.target.value)
+                      }
                       className="w-16 p-2 rounded bg-slate-800 text-center"
                     />
                   </div>
@@ -96,11 +172,16 @@ export default function QuinielaPage() {
           </div>
         ))}
 
-        <button className="w-full bg-green-600 py-4 rounded-2xl font-bold text-lg">
-          Guardar Pronósticos
+        <button
+          onClick={guardarPronosticos}
+          disabled={cargando}
+          className="w-full bg-green-600 py-4 rounded-2xl font-bold text-lg disabled:opacity-50"
+        >
+          {cargando ? "Guardando..." : "Guardar Pronósticos"}
         </button>
       </div>
-            <BottomNav />
+
+      <BottomNav />
     </main>
   );
 }
