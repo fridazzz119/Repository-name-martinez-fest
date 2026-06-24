@@ -30,6 +30,13 @@ const partidos = [
   "Jordania vs Argentina",
 ];
 
+type Pronostico = {
+  nombre: string;
+  partido: string;
+  goles_local: number;
+  goles_visitante: number;
+};
+
 export default function AdminPage() {
   const [clave, setClave] = useState("");
   const [autorizada, setAutorizada] = useState(false);
@@ -37,6 +44,8 @@ export default function AdminPage() {
   const [golesLocal, setGolesLocal] = useState("");
   const [golesVisitante, setGolesVisitante] = useState("");
   const [mensaje, setMensaje] = useState("");
+  const [pronosticos, setPronosticos] = useState<Pronostico[]>([]);
+  const [mostrandoPronosticos, setMostrandoPronosticos] = useState(false);
 
   async function guardarResultado() {
     if (golesLocal === "" || golesVisitante === "") {
@@ -60,6 +69,26 @@ export default function AdminPage() {
       setMensaje("❌ Error al guardar resultado");
     }
   }
+
+  async function cargarPronosticos() {
+    const res = await fetch("/api/admin-pronosticos");
+    const data = await res.json();
+
+    setPronosticos(data);
+    setMostrandoPronosticos(true);
+  }
+
+  const pronosticosPorPartido = pronosticos.reduce(
+    (acc, pronostico) => {
+      if (!acc[pronostico.partido]) {
+        acc[pronostico.partido] = [];
+      }
+
+      acc[pronostico.partido].push(pronostico);
+      return acc;
+    },
+    {} as Record<string, Pronostico[]>
+  );
 
   if (!autorizada) {
     return (
@@ -114,7 +143,7 @@ export default function AdminPage() {
           </h1>
 
           <p className="text-slate-500 font-semibold">
-            Captura resultados oficiales
+            Captura resultados y revisa pronósticos
           </p>
         </div>
 
@@ -125,6 +154,10 @@ export default function AdminPage() {
         )}
 
         <div className="bg-white border border-slate-200 rounded-3xl p-4 shadow-sm space-y-4">
+          <h2 className="text-xl font-extrabold text-blue-700">
+            📊 Capturar resultado
+          </h2>
+
           <label className="block">
             <span className="block text-sm font-bold text-slate-500 mb-2">
               Partido
@@ -179,6 +212,59 @@ export default function AdminPage() {
           >
             Guardar Resultado
           </button>
+        </div>
+
+        <div className="bg-white border border-slate-200 rounded-3xl p-4 shadow-sm mt-6">
+          <h2 className="text-xl font-extrabold text-blue-700 mb-3">
+            👀 Todos los pronósticos
+          </h2>
+
+          <button
+            onClick={cargarPronosticos}
+            className="w-full bg-blue-600 hover:bg-blue-500 text-white py-3 rounded-2xl font-extrabold"
+          >
+            Ver todos los pronósticos
+          </button>
+
+          {mostrandoPronosticos && pronosticos.length === 0 && (
+            <div className="mt-4 bg-blue-50 border border-blue-100 rounded-2xl p-4 text-center text-slate-500 font-semibold">
+              Aún no hay pronósticos guardados.
+            </div>
+          )}
+
+          {mostrandoPronosticos && pronosticos.length > 0 && (
+            <div className="mt-5 space-y-5">
+              {Object.entries(pronosticosPorPartido).map(
+                ([partido, lista]) => (
+                  <div
+                    key={partido}
+                    className="bg-blue-50 border border-blue-100 rounded-2xl p-3"
+                  >
+                    <h3 className="font-extrabold text-blue-700 mb-3">
+                      {partido}
+                    </h3>
+
+                    <div className="space-y-2">
+                      {lista.map((p, index) => (
+                        <div
+                          key={index}
+                          className="bg-white border border-slate-200 rounded-xl p-3 flex items-center justify-between"
+                        >
+                          <span className="font-bold text-slate-800">
+                            {p.nombre}
+                          </span>
+
+                          <span className="font-extrabold text-blue-700">
+                            {p.goles_local} - {p.goles_visitante}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )
+              )}
+            </div>
+          )}
         </div>
 
         <p className="text-center text-xs text-slate-400 mt-4">
