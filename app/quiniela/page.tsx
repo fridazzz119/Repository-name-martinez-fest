@@ -189,15 +189,18 @@ export default function QuinielaPage() {
   return (
     <main className="min-h-screen bg-white text-slate-900 p-4 pb-32">
       <div className="max-w-md mx-auto">
-        <div className="mb-6 pt-2">
-          <h1 className="text-3xl font-extrabold text-blue-700">
-            🏆 MARTÍNEZ FEST
-          </h1>
+      <div className="mb-4 pt-2">
+  <img
+    src="/logo.png"
+    alt="Martínez Fest"
+    className="w-24"
+  />
 
-          <p className="text-slate-500 font-semibold">
-            Quiniela Mundial 2026
-          </p>
-        </div>
+  <p className="text-slate-500 font-semibold mt-2">
+    Quiniela Mundial 2026
+  </p>
+</div>
+
 
         <div className="bg-blue-50 border border-blue-100 rounded-3xl p-4 mb-6 shadow-sm">
           <label className="block text-sm text-slate-500 mb-2">
