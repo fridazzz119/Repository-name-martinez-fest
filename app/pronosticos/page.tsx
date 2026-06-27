@@ -8,6 +8,7 @@ type Pronostico = {
   partido: string;
   goles_local: number;
   goles_visitante: number;
+  creado_en: string;
   resultado_local: number | null;
   resultado_visitante: number | null;
   puntos: number;
@@ -236,6 +237,22 @@ export default function PronosticosPage() {
               >
                 {p.texto}
               </div>
+
+              <div className="border-t border-slate-100 mt-4 pt-3">
+  <p className="text-[11px] text-slate-400 font-semibold">
+    🕒 Última modificación
+  </p>
+
+  <p className="text-sm text-slate-600 font-semibold">
+    {new Date(p.creado_en).toLocaleString("es-MX", {
+      timeZone: "America/Mexico_City",
+      day: "numeric",
+      month: "short",
+      hour: "numeric",
+      minute: "2-digit",
+    })}
+  </p>
+</div>
             </div>
           ))}
         </div>

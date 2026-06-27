@@ -34,13 +34,14 @@ export async function GET(request: Request) {
   const nombreNormalizado = normalizarNombre(nombre);
 
   const filas = await sql`
-    SELECT
-      p.nombre,
-      p.partido,
-      p.goles_local,
-      p.goles_visitante,
-      r.goles_local AS resultado_local,
-      r.goles_visitante AS resultado_visitante
+  SELECT
+  p.nombre,
+  p.partido,
+  p.goles_local,
+  p.goles_visitante,
+  p.creado_en,
+  r.goles_local AS resultado_local,
+  r.goles_visitante AS resultado_visitante
     FROM pronosticos p
     LEFT JOIN resultados r
       ON p.partido = r.partido
