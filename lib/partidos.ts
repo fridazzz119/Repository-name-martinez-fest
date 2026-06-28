@@ -86,7 +86,7 @@ export const partidos: Partido[] = [
     fecha: "1 JULIO",
     local: "Inglaterra",
     visitante: "RD Congo",
-    banderaLocal: "🏴",
+    banderaLocal: "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
     banderaVisitante: "🇨🇩",
     inicio: "2026-07-01T10:00:00-06:00",
   },

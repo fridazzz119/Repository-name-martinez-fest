@@ -3,78 +3,30 @@
 import { useState } from "react";
 import { Clock, Lock, Timer, Save } from "lucide-react";
 import BottomNav from "../components/BottomNav";
+import { nombrePartido, partidos } from "@/lib/partidos";
 
-type Partido = {
-  local: string;
-  visitante: string;
-  inicio: string;
-};
+function agruparPorDia() {
+  const grupos: Record<string, typeof partidos> = {};
 
-const grupos: { dia: string; fecha: string; partidos: Partido[] }[] = [
-  {
-    dia: "DOMINGO",
-    fecha: "28 JUNIO",
-    partidos: [
-      { local: "🇿🇦 Sudáfrica", visitante: "🇨🇦 Canadá", inicio: "2026-06-28T13:00:00-06:00" },
-    ],
-  },
-  {
-    dia: "LUNES",
-    fecha: "29 JUNIO",
-    partidos: [
-      { local: "🇧🇷 Brasil", visitante: "🇯🇵 Japón", inicio: "2026-06-29T11:00:00-06:00" },
-      { local: "🇩🇪 Alemania", visitante: "🇵🇾 Paraguay", inicio: "2026-06-29T14:30:00-06:00" },
-      { local: "🇳🇱 Países Bajos", visitante: "🇲🇦 Marruecos", inicio: "2026-06-29T19:00:00-06:00" },
-    ],
-  },
-  {
-    dia: "MARTES",
-    fecha: "30 JUNIO",
-    partidos: [
-      { local: "🇨🇮 Costa de Marfil", visitante: "🇳🇴 Noruega", inicio: "2026-06-30T11:00:00-06:00" },
-      { local: "🇫🇷 Francia", visitante: "🇸🇪 Suecia", inicio: "2026-06-30T15:00:00-06:00" },
-      { local: "🇲🇽 México", visitante: "🇪🇨 Ecuador", inicio: "2026-06-30T19:00:00-06:00" },
-    ],
-  },
-  {
-    dia: "MIÉRCOLES",
-    fecha: "1 JULIO",
-    partidos: [
-      { local: "🏴󠁧󠁢󠁥󠁮󠁧󠁿 Inglaterra", visitante: "🇨🇩 RD Congo", inicio: "2026-07-01T10:00:00-06:00" },
-      { local: "🇧🇪 Bélgica", visitante: "🇸🇳 Senegal", inicio: "2026-07-01T14:00:00-06:00" },
-      { local: "🇺🇸 Estados Unidos", visitante: "🇧🇦 Bosnia y Herzegovina", inicio: "2026-07-01T18:00:00-06:00" },
-    ],
-  },
-  {
-    dia: "JUEVES",
-    fecha: "2 JULIO",
-    partidos: [
-      { local: "🇪🇸 España", visitante: "🇦🇹 Austria", inicio: "2026-07-02T13:00:00-06:00" },
-      { local: "🇵🇹 Portugal", visitante: "🇭🇷 Croacia", inicio: "2026-07-02T17:00:00-06:00" },
-      { local: "🇨🇭 Suiza", visitante: "🇩🇿 Argelia", inicio: "2026-07-02T21:00:00-06:00" },
-    ],
-  },
-  {
-    dia: "VIERNES",
-    fecha: "3 JULIO",
-    partidos: [
-      { local: "🇦🇺 Australia", visitante: "🇪🇬 Egipto", inicio: "2026-07-03T12:00:00-06:00" },
-      { local: "🇦🇷 Argentina", visitante: "🇨🇻 Cabo Verde", inicio: "2026-07-03T16:00:00-06:00" },
-      { local: "🇨🇴 Colombia", visitante: "🇬🇭 Ghana", inicio: "2026-07-03T19:30:00-06:00" },
-    ],
-  },
-];
+  for (const partido of partidos) {
+    const clave = `${partido.dia}|${partido.fecha}`;
 
-function quitarBandera(texto: string) {
-  return texto.replace(/^(\S+)\s/, "");
-}
+    if (!grupos[clave]) {
+      grupos[clave] = [];
+    }
 
-function obtenerBandera(texto: string) {
-  return texto.split(" ")[0];
-}
+    grupos[clave].push(partido);
+  }
 
-function partidoTexto(partido: Partido) {
-  return `${quitarBandera(partido.local)} vs ${quitarBandera(partido.visitante)}`;
+  return Object.entries(grupos).map(([clave, lista]) => {
+    const [dia, fecha] = clave.split("|");
+
+    return {
+      dia,
+      fecha,
+      partidos: lista,
+    };
+  });
 }
 
 function estaCerrado(inicio: string) {
@@ -112,10 +64,13 @@ function tiempoRestante(inicio: string) {
   const minutos = minutosTotales % 60;
 
   if (horas <= 0) return `${minutos} min`;
+
   return `${horas} h ${minutos} min`;
 }
 
 export default function QuinielaPage() {
+  const grupos = agruparPorDia();
+
   const [nombre, setNombre] = useState("");
   const [pronosticos, setPronosticos] = useState<
     Record<string, { local: string; visitante: string }>
@@ -144,8 +99,8 @@ export default function QuinielaPage() {
       return;
     }
 
-    const partidosAbiertos = grupos.flatMap((grupo) =>
-      grupo.partidos.filter((partido) => !estaCerrado(partido.inicio))
+    const partidosAbiertos = partidos.filter(
+      (partido) => !estaCerrado(partido.inicio)
     );
 
     const pronosticosPermitidos: Record<
@@ -154,7 +109,7 @@ export default function QuinielaPage() {
     > = {};
 
     for (const partido of partidosAbiertos) {
-      const clave = partidoTexto(partido);
+      const clave = nombrePartido(partido);
 
       if (pronosticos[clave]) {
         pronosticosPermitidos[clave] = pronosticos[clave];
@@ -193,21 +148,23 @@ export default function QuinielaPage() {
   }
 
   return (
-    <main className="min-h-screen bg-white text-slate-950 p-4 pb-32">
+    <main className="min-h-screen bg-slate-50 text-black p-4 pb-32">
       <div className="max-w-md mx-auto">
-        <div className="mb-6 pt-3">
-          <img src="/logo.png" alt="CEJUDO FEST" className="w-24 mb-3" />
+        <div className="pt-4 mb-6 text-center">
+          <p className="text-xs font-extrabold tracking-[0.35em] text-blue-600 mb-2">
+            SEGUNDA EDICIÓN
+          </p>
 
-          <h1 className="text-3xl font-extrabold text-black">
+          <h1 className="text-4xl font-black tracking-tight text-black">
             CEJUDO FEST
           </h1>
 
-          <p className="text-slate-500 font-semibold">
-            Segunda edición · Eliminatoria de 32
+          <p className="text-slate-500 font-semibold mt-2">
+            Quiniela Mundial 2026 · Eliminatoria de 32
           </p>
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-3xl p-4 mb-6 shadow-sm">
+        <div className="bg-white border border-slate-200 rounded-[28px] p-4 mb-6 shadow-sm">
           <label className="block text-sm text-slate-500 mb-2 font-semibold">
             Tu nombre
           </label>
@@ -217,7 +174,7 @@ export default function QuinielaPage() {
             value={nombre}
             onChange={(e) => setNombre(e.target.value)}
             placeholder="Ej. Frida"
-            className="w-full p-3 rounded-2xl bg-white border border-slate-200 text-black outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full p-4 rounded-2xl bg-slate-50 border border-slate-200 text-black font-bold outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white"
           />
         </div>
 
@@ -230,108 +187,107 @@ export default function QuinielaPage() {
         {grupos.map((grupo) => (
           <div key={`${grupo.dia}-${grupo.fecha}`} className="mb-8">
             <div className="bg-blue-600 text-white rounded-full py-3 px-4 text-center shadow-md mb-4">
-              <p className="text-xs font-bold tracking-[0.25em]">
+              <p className="text-xs font-extrabold tracking-[0.25em]">
                 {grupo.dia}
               </p>
-              <p className="text-lg font-extrabold tracking-wide">
+
+              <p className="text-lg font-black tracking-wide">
                 {grupo.fecha}
               </p>
             </div>
 
             <div className="space-y-4">
               {grupo.partidos.map((partido) => {
-                const clave = partidoTexto(partido);
+                const clave = nombrePartido(partido);
                 const cerrado = estaCerrado(partido.inicio);
                 const restante = tiempoRestante(partido.inicio);
 
                 return (
                   <div
                     key={clave}
-                    className={`border rounded-3xl p-4 shadow-sm ${
+                    className={`overflow-hidden border rounded-[30px] shadow-sm ${
                       cerrado
-                        ? "bg-slate-50 border-slate-200 opacity-80"
+                        ? "bg-slate-100 border-slate-200 opacity-75"
                         : "bg-white border-slate-200"
                     }`}
                   >
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center gap-2 text-slate-500 font-bold text-xs">
+                    <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100">
+                      <div className="flex items-center gap-2 text-slate-500 font-extrabold text-xs">
                         <Clock size={15} />
-                        <span>Inicia {horaTexto(partido.inicio)}</span>
+                        <span>{horaTexto(partido.inicio)}</span>
                       </div>
 
                       <div
-                        className={`flex items-center gap-1 rounded-full px-3 py-1 text-[11px] font-extrabold ${
+                        className={`flex items-center gap-1 rounded-full px-3 py-1 text-[11px] font-black ${
                           cerrado
                             ? "bg-red-50 text-red-600 border border-red-100"
-                            : "bg-green-50 text-green-700 border border-green-100"
+                            : "bg-blue-50 text-blue-600 border border-blue-100"
                         }`}
                       >
                         {cerrado ? <Lock size={13} /> : <Timer size={13} />}
-                        <span>{cerrado ? "CERRADO" : `CIERRA EN ${restante}`}</span>
+                        <span>
+                          {cerrado ? "CERRADO" : `CIERRA ${restante}`}
+                        </span>
                       </div>
                     </div>
 
-                    {!cerrado && (
-                      <p className="text-[11px] text-slate-400 font-semibold text-center mb-4">
-                        Cierre oficial {cierreTexto(partido.inicio)}
-                      </p>
-                    )}
+                    <div className="p-5">
+                      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4">
+  <div className="text-left min-w-0">
+    <div className="text-4xl mb-2">
+      {partido.banderaLocal}
+    </div>
 
-                    <div className="grid grid-cols-3 items-center gap-3">
-                      <div className="text-center">
-                        <div className="text-4xl mb-2">
-                          {obtenerBandera(partido.local)}
-                        </div>
+    <p className="font-black text-sm text-black leading-tight">
+      {partido.local}
+    </p>
+  </div>
 
-                        <p className="font-extrabold text-sm text-black">
-                          {quitarBandera(partido.local)}
+  <div className="flex items-center justify-center gap-2">
+    <input
+      type="number"
+      min="0"
+      disabled={cerrado}
+      value={pronosticos[clave]?.local || ""}
+      onChange={(e) =>
+        cambiarMarcador(clave, "local", e.target.value)
+      }
+      className="w-14 h-12 rounded-2xl bg-slate-50 border border-slate-200 text-center font-black text-xl outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-slate-200 disabled:text-slate-400"
+    />
+
+    <span className="font-black text-xl text-slate-300">
+      -
+    </span>
+
+    <input
+      type="number"
+      min="0"
+      disabled={cerrado}
+      value={pronosticos[clave]?.visitante || ""}
+      onChange={(e) =>
+        cambiarMarcador(clave, "visitante", e.target.value)
+      }
+      className="w-14 h-12 rounded-2xl bg-slate-50 border border-slate-200 text-center font-black text-xl outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-slate-200 disabled:text-slate-400"
+    />
+  </div>
+
+  <div className="text-right min-w-0">
+    <div className="text-4xl mb-2">
+      {partido.banderaVisitante}
+    </div>
+
+    <p className="font-black text-sm text-black leading-tight">
+      {partido.visitante}
+    </p>
+  </div>
+</div>
+
+                      {!cerrado && (
+                        <p className="text-[11px] text-slate-400 font-semibold text-center mt-5">
+                          Cierre oficial {cierreTexto(partido.inicio)}
                         </p>
-                      </div>
-
-                      <div className="flex items-center justify-center gap-2">
-                        <input
-                          type="number"
-                          min="0"
-                          disabled={cerrado}
-                          value={pronosticos[clave]?.local || ""}
-                          onChange={(e) =>
-                            cambiarMarcador(clave, "local", e.target.value)
-                          }
-                          className="w-14 p-2 rounded-xl bg-slate-50 border border-slate-200 text-center font-extrabold text-lg outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-slate-200 disabled:text-slate-400"
-                        />
-
-                        <span className="font-extrabold text-slate-400">-</span>
-
-                        <input
-                          type="number"
-                          min="0"
-                          disabled={cerrado}
-                          value={pronosticos[clave]?.visitante || ""}
-                          onChange={(e) =>
-                            cambiarMarcador(clave, "visitante", e.target.value)
-                          }
-                          className="w-14 p-2 rounded-xl bg-slate-50 border border-slate-200 text-center font-extrabold text-lg outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-slate-200 disabled:text-slate-400"
-                        />
-                      </div>
-
-                      <div className="text-center">
-                        <div className="text-4xl mb-2">
-                          {obtenerBandera(partido.visitante)}
-                        </div>
-
-                        <p className="font-extrabold text-sm text-black">
-                          {quitarBandera(partido.visitante)}
-                        </p>
-                      </div>
+                      )}
                     </div>
-
-                    <p
-                      className={`text-center text-xs font-extrabold mt-4 ${
-                        cerrado ? "text-red-500" : "text-blue-600"
-                      }`}
-                    >
-                      {cerrado ? "Pronóstico cerrado" : "Tu pronóstico"}
-                    </p>
                   </div>
                 );
               })}
@@ -353,6 +309,7 @@ export default function QuinielaPage() {
     </main>
   );
 }
+
 
 
 
