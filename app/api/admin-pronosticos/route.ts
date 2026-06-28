@@ -1,45 +1,28 @@
 import { neon } from "@neondatabase/serverless";
 import { NextResponse } from "next/server";
+import { partidos } from "@/lib/partidos";
 
 const sql = neon(process.env.POSTGRES_URL!);
 
 export async function GET() {
   const pronosticos = await sql`
     SELECT nombre, partido, goles_local, goles_visitante
-    FROM pronosticos
-  ORDER BY
-CASE partido
-  WHEN 'Suiza vs Canadá' THEN 1
-  WHEN 'Bosnia y Herzegovina vs Catar' THEN 2
-  WHEN 'Escocia vs Brasil' THEN 3
-  WHEN 'Marruecos vs Haití' THEN 4
-  WHEN 'República Checa vs México' THEN 5
-  WHEN 'Sudáfrica vs Corea del Sur' THEN 6
-
-  WHEN 'Alemania vs Ecuador' THEN 7
-  WHEN 'Curazao vs Costa de Marfil' THEN 8
-  WHEN 'Túnez vs Países Bajos' THEN 9
-  WHEN 'Japón vs Suecia' THEN 10
-  WHEN 'Estados Unidos vs Turquía' THEN 11
-  WHEN 'Australia vs Paraguay' THEN 12
-
-  WHEN 'Noruega vs Francia' THEN 13
-  WHEN 'Senegal vs Irak' THEN 14
-  WHEN 'Uruguay vs España' THEN 15
-  WHEN 'Cabo Verde vs Arabia Saudita' THEN 16
-  WHEN 'Egipto vs Irán' THEN 17
-  WHEN 'Nueva Zelanda vs Bélgica' THEN 18
-
-  WHEN 'Panamá vs Inglaterra' THEN 19
-  WHEN 'Croacia vs Ghana' THEN 20
-  WHEN 'Colombia vs Portugal' THEN 21
-  WHEN 'RD Congo vs Uzbekistán' THEN 22
-  WHEN 'Argelia vs Austria' THEN 23
-  WHEN 'Jordania vs Argentina' THEN 24
-END,
-nombre;
-
+    FROM pronosticos;
   `;
 
-  return NextResponse.json(pronosticos);
+  const orden = new Map(
+    partidos.map((p) => [`${p.local} vs ${p.visitante}`, p.orden])
+  );
+
+  const ordenados = [...pronosticos].sort((a, b) => {
+    const ordenA = orden.get(a.partido) ?? 999;
+    const ordenB = orden.get(b.partido) ?? 999;
+
+    if (ordenA !== ordenB) return ordenA - ordenB;
+
+    return String(a.nombre).localeCompare(String(b.nombre));
+  });
+
+  return NextResponse.json(ordenados);
 }
+

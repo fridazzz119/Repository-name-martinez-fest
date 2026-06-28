@@ -1,5 +1,6 @@
 import { neon } from "@neondatabase/serverless";
 import { NextResponse } from "next/server";
+import { partidos } from "@/lib/partidos";
 
 const sql = neon(process.env.POSTGRES_URL!);
 
@@ -26,7 +27,7 @@ export async function GET(request: Request) {
   if (!nombre) {
     return NextResponse.json({
       pronosticos: [],
-      total: 24,
+      total: partidos.length,
       registrados: 0,
     });
   }
@@ -34,51 +35,32 @@ export async function GET(request: Request) {
   const nombreNormalizado = normalizarNombre(nombre);
 
   const filas = await sql`
-  SELECT
-  p.nombre,
-  p.partido,
-  p.goles_local,
-  p.goles_visitante,
-  p.creado_en,
-  r.goles_local AS resultado_local,
-  r.goles_visitante AS resultado_visitante
+    SELECT
+      p.nombre,
+      p.partido,
+      p.goles_local,
+      p.goles_visitante,
+      p.creado_en,
+      r.goles_local AS resultado_local,
+      r.goles_visitante AS resultado_visitante
     FROM pronosticos p
     LEFT JOIN resultados r
       ON p.partido = r.partido
-    WHERE p.nombre = ${nombreNormalizado}
-    ORDER BY
-      CASE p.partido
-        WHEN 'Suiza vs Canadá' THEN 1
-        WHEN 'Bosnia y Herzegovina vs Catar' THEN 2
-        WHEN 'Escocia vs Brasil' THEN 3
-        WHEN 'Marruecos vs Haití' THEN 4
-        WHEN 'República Checa vs México' THEN 5
-        WHEN 'Sudáfrica vs Corea del Sur' THEN 6
-
-        WHEN 'Alemania vs Ecuador' THEN 7
-        WHEN 'Curazao vs Costa de Marfil' THEN 8
-        WHEN 'Túnez vs Países Bajos' THEN 9
-        WHEN 'Japón vs Suecia' THEN 10
-        WHEN 'Estados Unidos vs Turquía' THEN 11
-        WHEN 'Australia vs Paraguay' THEN 12
-
-        WHEN 'Noruega vs Francia' THEN 13
-        WHEN 'Senegal vs Irak' THEN 14
-        WHEN 'Uruguay vs España' THEN 15
-        WHEN 'Cabo Verde vs Arabia Saudita' THEN 16
-        WHEN 'Egipto vs Irán' THEN 17
-        WHEN 'Nueva Zelanda vs Bélgica' THEN 18
-
-        WHEN 'Panamá vs Inglaterra' THEN 19
-        WHEN 'Croacia vs Ghana' THEN 20
-        WHEN 'Colombia vs Portugal' THEN 21
-        WHEN 'RD Congo vs Uzbekistán' THEN 22
-        WHEN 'Argelia vs Austria' THEN 23
-        WHEN 'Jordania vs Argentina' THEN 24
-      END;
+    WHERE p.nombre = ${nombreNormalizado};
   `;
 
-  const pronosticos = filas.map((fila) => {
+  const orden = new Map(
+    partidos.map((p) => [`${p.local} vs ${p.visitante}`, p.orden])
+  );
+
+  const filasOrdenadas = [...filas].sort((a, b) => {
+    const ordenA = orden.get(a.partido) ?? 999;
+    const ordenB = orden.get(b.partido) ?? 999;
+
+    return ordenA - ordenB;
+  });
+
+  const pronosticos = filasOrdenadas.map((fila) => {
     const predLocal = Number(fila.goles_local);
     const predVisitante = Number(fila.goles_visitante);
 
@@ -90,7 +72,7 @@ export async function GET(request: Request) {
         ...fila,
         puntos: 0,
         estado: "pendiente",
-        texto: "⏳ Resultado pendiente",
+        texto: "Resultado pendiente",
       };
     }
 
@@ -102,7 +84,7 @@ export async function GET(request: Request) {
         ...fila,
         puntos: 3,
         estado: "exacto",
-        texto: "🎯 Marcador exacto +3",
+        texto: "Marcador exacto +3",
       };
     }
 
@@ -114,7 +96,7 @@ export async function GET(request: Request) {
         ...fila,
         puntos: 1,
         estado: "acierto",
-        texto: "✅ Ganador/empate correcto +1",
+        texto: "Ganador/empate correcto +1",
       };
     }
 
@@ -122,13 +104,13 @@ export async function GET(request: Request) {
       ...fila,
       puntos: 0,
       estado: "fallo",
-      texto: "❌ Sin puntos",
+      texto: "Sin puntos",
     };
   });
 
   return NextResponse.json({
     pronosticos,
-    total: 24,
+    total: partidos.length,
     registrados: pronosticos.length,
   });
 }

@@ -71,9 +71,13 @@ export async function GET() {
       }
     }
 
-    const rankingOrdenado = Object.values(ranking).sort(
-      (a, b) => b.puntos - a.puntos
-    );
+   const rankingOrdenado = Object.values(ranking).sort((a, b) => {
+  if (b.puntos !== a.puntos) return b.puntos - a.puntos;
+  if (b.exactos !== a.exactos) return b.exactos - a.exactos;
+  if (b.aciertos !== a.aciertos) return b.aciertos - a.aciertos;
+
+  return a.nombre.localeCompare(b.nombre);
+});
 
     return NextResponse.json(rankingOrdenado);
   } catch (error) {

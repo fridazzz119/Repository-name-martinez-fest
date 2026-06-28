@@ -2,16 +2,17 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Goal, User, ChartColumn, Trophy, Settings } from "lucide-react";
 
 export default function BottomNav() {
   const pathname = usePathname();
 
   const tabs = [
-    { href: "/quiniela", icon: "⚽", label: "Quiniela" },
-    { href: "/pronosticos", icon: "👤", label: "Mis" },
-    { href: "/resultados", icon: "📊", label: "Resultados" },
-    { href: "/ranking", icon: "🏆", label: "Ranking" },
-    { href: "/admin", icon: "⚙️", label: "Admin" },
+    { href: "/quiniela", icon: Goal, label: "Quiniela" },
+    { href: "/pronosticos", icon: User, label: "Mis" },
+    { href: "/resultados", icon: ChartColumn, label: "Resultados" },
+    { href: "/ranking", icon: Trophy, label: "Ranking" },
+    { href: "/admin", icon: Settings, label: "Admin" },
   ];
 
   return (
@@ -19,6 +20,7 @@ export default function BottomNav() {
       <div className="max-w-md mx-auto grid grid-cols-5 gap-1 px-2 py-2">
         {tabs.map((tab) => {
           const active = pathname === tab.href;
+          const Icon = tab.icon;
 
           return (
             <Link
@@ -30,10 +32,10 @@ export default function BottomNav() {
                   : "text-slate-500 hover:bg-slate-100"
               }`}
             >
-              <span className="text-xl leading-none">{tab.icon}</span>
+              <Icon size={22} strokeWidth={2.4} />
 
               <span
-                className={`mt-1 text-[11px] font-bold ${
+                className={`mt-1 text-[10.5px] font-bold ${
                   active ? "text-white" : "text-slate-500"
                 }`}
               >

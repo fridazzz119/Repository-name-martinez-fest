@@ -1,34 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { ChartColumn, Eye, Save, ShieldCheck } from "lucide-react";
 import BottomNav from "../components/BottomNav";
+import { nombrePartido, partidos } from "@/lib/partidos";
 
-const partidos = [
-  "Suiza vs Canadá",
-  "Bosnia y Herzegovina vs Catar",
-  "Escocia vs Brasil",
-  "Marruecos vs Haití",
-  "República Checa vs México",
-  "Sudáfrica vs Corea del Sur",
-  "Alemania vs Ecuador",
-  "Curazao vs Costa de Marfil",
-  "Túnez vs Países Bajos",
-  "Japón vs Suecia",
-  "Estados Unidos vs Turquía",
-  "Australia vs Paraguay",
-  "Noruega vs Francia",
-  "Senegal vs Irak",
-  "Uruguay vs España",
-  "Cabo Verde vs Arabia Saudita",
-  "Egipto vs Irán",
-  "Nueva Zelanda vs Bélgica",
-  "Panamá vs Inglaterra",
-  "Croacia vs Ghana",
-  "Colombia vs Portugal",
-  "RD Congo vs Uzbekistán",
-  "Argelia vs Austria",
-  "Jordania vs Argentina",
-];
+const listaPartidos = partidos.map((p) => nombrePartido(p));
 
 type Pronostico = {
   nombre: string;
@@ -40,7 +17,7 @@ type Pronostico = {
 export default function AdminPage() {
   const [clave, setClave] = useState("");
   const [autorizada, setAutorizada] = useState(false);
-  const [partido, setPartido] = useState(partidos[0]);
+  const [partido, setPartido] = useState(listaPartidos[0]);
   const [golesLocal, setGolesLocal] = useState("");
   const [golesVisitante, setGolesVisitante] = useState("");
   const [mensaje, setMensaje] = useState("");
@@ -49,7 +26,7 @@ export default function AdminPage() {
 
   async function guardarResultado() {
     if (golesLocal === "" || golesVisitante === "") {
-      setMensaje("⚠️ Captura ambos marcadores");
+      setMensaje("Captura ambos marcadores");
       return;
     }
 
@@ -62,11 +39,11 @@ export default function AdminPage() {
     });
 
     if (res.ok) {
-      setMensaje("✅ Resultado guardado correctamente");
+      setMensaje("Resultado guardado correctamente");
       setGolesLocal("");
       setGolesVisitante("");
     } else {
-      setMensaje("❌ Error al guardar resultado");
+      setMensaje("Error al guardar resultado");
     }
   }
 
@@ -92,11 +69,17 @@ export default function AdminPage() {
 
   if (!autorizada) {
     return (
-      <main className="min-h-screen bg-white text-slate-900 flex items-center justify-center p-6">
+      <main className="min-h-screen bg-white text-black flex items-center justify-center p-6">
         <div className="w-full max-w-md bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
-          <h1 className="text-3xl font-extrabold text-blue-700 mb-2">
-            🔒 Admin
-          </h1>
+          <div className="flex items-center gap-3 mb-2">
+            <div className="bg-blue-600 text-white rounded-2xl p-2">
+              <ShieldCheck size={24} />
+            </div>
+
+            <h1 className="text-3xl font-extrabold text-black">
+              Admin
+            </h1>
+          </div>
 
           <p className="text-slate-500 font-semibold mb-6">
             Acceso para capturar resultados oficiales
@@ -107,7 +90,7 @@ export default function AdminPage() {
             value={clave}
             onChange={(e) => setClave(e.target.value)}
             placeholder="Clave de administrador"
-            className="w-full p-3 rounded-2xl bg-blue-50 border border-blue-100 text-slate-900 outline-none focus:ring-2 focus:ring-blue-500 mb-4"
+            className="w-full p-3 rounded-2xl bg-white border border-slate-200 text-black outline-none focus:ring-2 focus:ring-blue-500 mb-4"
           />
 
           <button
@@ -116,7 +99,7 @@ export default function AdminPage() {
                 setAutorizada(true);
                 setMensaje("");
               } else {
-                setMensaje("❌ Clave incorrecta");
+                setMensaje("Clave incorrecta");
               }
             }}
             className="w-full bg-blue-600 hover:bg-blue-500 text-white py-3 rounded-2xl font-extrabold"
@@ -135,12 +118,18 @@ export default function AdminPage() {
   }
 
   return (
-    <main className="min-h-screen bg-white text-slate-900 p-4 pb-32">
+    <main className="min-h-screen bg-white text-black p-4 pb-32">
       <div className="max-w-md mx-auto">
         <div className="mb-6 pt-2">
-          <h1 className="text-3xl font-extrabold text-blue-700">
-            ⚙️ Administración
-          </h1>
+          <div className="flex items-center gap-3 mb-2">
+            <div className="bg-blue-600 text-white rounded-2xl p-2">
+              <ShieldCheck size={24} />
+            </div>
+
+            <h1 className="text-3xl font-extrabold text-black">
+              Administración
+            </h1>
+          </div>
 
           <p className="text-slate-500 font-semibold">
             Captura resultados y revisa pronósticos
@@ -154,9 +143,13 @@ export default function AdminPage() {
         )}
 
         <div className="bg-white border border-slate-200 rounded-3xl p-4 shadow-sm space-y-4">
-          <h2 className="text-xl font-extrabold text-blue-700">
-            📊 Capturar resultado
-          </h2>
+          <div className="flex items-center gap-2">
+            <ChartColumn size={21} className="text-blue-600" />
+
+            <h2 className="text-xl font-extrabold text-black">
+              Capturar resultado
+            </h2>
+          </div>
 
           <label className="block">
             <span className="block text-sm font-bold text-slate-500 mb-2">
@@ -166,9 +159,9 @@ export default function AdminPage() {
             <select
               value={partido}
               onChange={(e) => setPartido(e.target.value)}
-              className="w-full p-3 rounded-2xl bg-blue-50 border border-blue-100 text-slate-900 outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full p-3 rounded-2xl bg-white border border-slate-200 text-black outline-none focus:ring-2 focus:ring-blue-500"
             >
-              {partidos.map((p) => (
+              {listaPartidos.map((p) => (
                 <option key={p} value={p}>
                   {p}
                 </option>
@@ -186,11 +179,13 @@ export default function AdminPage() {
                 min="0"
                 value={golesLocal}
                 onChange={(e) => setGolesLocal(e.target.value)}
-                className="w-full p-3 rounded-2xl bg-blue-50 border border-blue-100 text-center text-xl font-extrabold outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full p-3 rounded-2xl bg-slate-50 border border-slate-200 text-center text-xl font-extrabold outline-none focus:ring-2 focus:ring-blue-500"
               />
             </label>
 
-            <div className="text-center text-2xl font-extrabold pb-3">-</div>
+            <div className="text-center text-2xl font-extrabold pb-3 text-slate-400">
+              -
+            </div>
 
             <label>
               <span className="block text-sm font-bold text-slate-500 mb-2">
@@ -201,23 +196,28 @@ export default function AdminPage() {
                 min="0"
                 value={golesVisitante}
                 onChange={(e) => setGolesVisitante(e.target.value)}
-                className="w-full p-3 rounded-2xl bg-blue-50 border border-blue-100 text-center text-xl font-extrabold outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full p-3 rounded-2xl bg-slate-50 border border-slate-200 text-center text-xl font-extrabold outline-none focus:ring-2 focus:ring-blue-500"
               />
             </label>
           </div>
 
           <button
             onClick={guardarResultado}
-            className="w-full bg-blue-600 hover:bg-blue-500 text-white py-4 rounded-2xl font-extrabold text-lg shadow-lg"
+            className="w-full bg-blue-600 hover:bg-blue-500 text-white py-4 rounded-2xl font-extrabold text-lg shadow-lg flex items-center justify-center gap-2"
           >
+            <Save size={20} />
             Guardar Resultado
           </button>
         </div>
 
         <div className="bg-white border border-slate-200 rounded-3xl p-4 shadow-sm mt-6">
-          <h2 className="text-xl font-extrabold text-blue-700 mb-3">
-            👀 Todos los pronósticos
-          </h2>
+          <div className="flex items-center gap-2 mb-3">
+            <Eye size={21} className="text-blue-600" />
+
+            <h2 className="text-xl font-extrabold text-black">
+              Todos los pronósticos
+            </h2>
+          </div>
 
           <button
             onClick={cargarPronosticos}
@@ -238,9 +238,9 @@ export default function AdminPage() {
                 ([partido, lista]) => (
                   <div
                     key={partido}
-                    className="bg-blue-50 border border-blue-100 rounded-2xl p-3"
+                    className="bg-slate-50 border border-slate-200 rounded-2xl p-3"
                   >
-                    <h3 className="font-extrabold text-blue-700 mb-3">
+                    <h3 className="font-extrabold text-black mb-3">
                       {partido}
                     </h3>
 
@@ -254,7 +254,7 @@ export default function AdminPage() {
                             {p.nombre}
                           </span>
 
-                          <span className="font-extrabold text-blue-700">
+                          <span className="font-extrabold text-blue-600">
                             {p.goles_local} - {p.goles_visitante}
                           </span>
                         </div>
@@ -276,4 +276,5 @@ export default function AdminPage() {
     </main>
   );
 }
+
 
